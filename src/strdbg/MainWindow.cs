@@ -67,7 +67,7 @@ public partial class MainWindow : Gtk.Window
 		try
 		{
 			ResultText.Buffer.Text = "===Build Started===\n";
-			res = new Strobe.Compiler(Editor.Buffer.Text).compile();
+			res = new Strobe.Compiler(Editor.Buffer.Text).compile(true);
 			Debug.app = res.Bytes;
 			foreach (Strobe.Error err in res.Errors)
 			{

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using StrobeVM.Hardware;
+using System;
+
 namespace StrobeVM.Firmware
 {
 	/// <summary>
@@ -157,11 +159,11 @@ namespace StrobeVM.Firmware
 					break;
 				case Instruction.OpType.Label:
 					int[] h = proc.TwoArgs(now.Param);
-					Labels.Add(h[0],loc[currentprocess - 1]);
+					Labels.Add(BitConverter.ToInt32(AMem(h[0]),0),loc[currentprocess - 1]);
 					break;
 				case Instruction.OpType.Goto:
 					int[] c = proc.TwoArgs(now.Param);
-					if (Labels.ContainsKey(c[0]))
+					if (Labels.ContainsKey(BitConverter.ToInt32(AMem(c[0]),0)))
 					if (AMem(c[1])[0] == 0x0)
 						loc[currentprocess - 1] = Labels[c[0]];
 					break;

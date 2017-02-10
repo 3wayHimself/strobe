@@ -10,21 +10,22 @@ namespace StrobeC
 		public static void Main(string[] args)
 		{
             bool pauseEnd = false;
+            bool debug = false;
 			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.WriteLine("Compiling...");
 			Console.ResetColor();
-            foreach(string a in args)
-            {
-                if (a == "--pause")
-                    pauseEnd = true;
-            }
 			if (args.Length > 0)
 			{
 				string name = args[0];
 				string save = args[0] + ".dif";
 				for (int i = 1; i < args.Length; i++)
 				{
-					if (args[i].StartsWith("--out:"))
+                    if (args[i] == "--debug")
+                        debug = true;
+                    if (args[i] == "--pause")
+                        pauseEnd = true;
+                    
+                    if (args[i].StartsWith("--out:"))
 					{
 						save = args[i].TrimStart("--out:".ToCharArray());
 					}
@@ -37,7 +38,7 @@ namespace StrobeC
 					CompilerResult result = new CompilerResult ();
 					string input = File.ReadAllText(name);
 					try {
-					result = new Compiler(input).compile();
+					result = new Compiler(input).compile(debug);
 					} catch(Exception e) {
 						Console.WriteLine ("Error n: {0}",e.Message);
 					}
@@ -57,18 +58,20 @@ namespace StrobeC
 					{
 						try
 						{
+                            string sdebug = "";
+                            if (debug) sdebug = "--debug";
 							File.WriteAllBytes(save, result.Bytes);
 							Console.ForegroundColor = ConsoleColor.Green;
 							Console.WriteLine("Compile successfully completed!");
 							Console.ForegroundColor = ConsoleColor.DarkGray;
 							Console.WriteLine("VM Runtime [1M]:\n");
 							Console.ResetColor();
-							StrobeVMC.Main(new string[]{"--1m",save});
+							StrobeVMC.Main(new string[]{"--1m",save,sdebug});
 
 						}
-						catch (Exception)
+						catch (Exception e)
 						{
-							Console.WriteLine("Error 0: \"Couldn't write to file\" at 0");
+							Console.WriteLine("Error 0: \""+e.Message+"\" at 0");
 						}
 					}
 				}

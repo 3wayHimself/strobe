@@ -1,13 +1,19 @@
 ﻿#include <bioslib.str>
+#include <math.str>
 namespace Name
 {
     function Main()
     {
-		$one = new(0);
-		if($one == 0)
+		$test = new(true);
+		label($hello);
 		{
-			System.Write("Hello World\n");
+			Math.Write($test);
+			System.Write("\n");
+			Math.Write($hello);
+			System.Write("\n");
+
 		}
+		goto($hello,$test);
     	System.Exit(0);
     }
 }

@@ -15,7 +15,7 @@
 		}
 
 		// Compile
-		public CompilerResult compile()
+		public CompilerResult compile(bool debug)
 		{
 			// Define the arrays.
 			LexerResult lexer;
@@ -24,7 +24,7 @@
 			CodeGeneratorResult codegen;
 
 			// Lexical analysis
-			lexer = new Lexer(input).get();
+			lexer = new Lexer(input).get(debug);
 
 			// Warnings
 			foreach (Info e in lexer.Warnings)
@@ -49,7 +49,7 @@
 			}
 
 			// Do half of the parser's work
-			simplifier = new Simplifier(lexer.Tokens).get();
+			simplifier = new Simplifier(lexer.Tokens).get(debug);
 
 			// Warnings
 			foreach (Info e in simplifier.Warnings)
@@ -75,7 +75,7 @@
 			}
 
 			// Do the rest of the work
-			parser = new Parser(simplifier.STokens).get();
+			parser = new Parser(simplifier.STokens).get(debug);
 
 			// Warnings
 			foreach (Info e in parser.Warnings)
@@ -101,7 +101,7 @@
 			}
 
 			// Compile
-				codegen = new CodeGenerator(parser.Tree).get();
+				codegen = new CodeGenerator(parser.Tree).get(debug);
 
 			// Warnings
 			foreach (Info e in codegen.Warnings)

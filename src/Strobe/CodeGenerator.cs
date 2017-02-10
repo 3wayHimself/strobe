@@ -37,6 +37,11 @@ namespace Strobe
 	/// </summary>
 	public class CodeGenerator
 	{
+        /// <summary>
+        /// The label id
+        /// </summary>
+        int LabelID = 0;
+
 		/// <summary>
 		/// The lib folder.
 		/// </summary>
@@ -133,7 +138,7 @@ namespace Strobe
 
 					// Compile the file.
 					var x = new Parser (new Simplifier (new Lexer (File.ReadAllText (s))
-							.get ().Tokens).get ().STokens).get ().Tree;
+							.get (false).Tokens).get (false).STokens).get (false).Tree;
 
 					// Add the namespaces
 					foreach (Namespace y in x.Namespaces) {
@@ -152,7 +157,7 @@ namespace Strobe
 
 					// Compile the file
 					var x = new Parser (new Simplifier (new Lexer (File.ReadAllText (s))
-						.get ().Tokens).get ().STokens).get ().Tree;
+						.get (false).Tokens).get (false).STokens).get (false).Tree;
 
 					// Add the namespaces
 					foreach (Namespace y in x.Namespaces) {
@@ -319,6 +324,43 @@ namespace Strobe
                 Output.Add(add);
 
             // End Multiply
+            Output.Add(0xff);
+        }
+
+        /// <summary>
+        /// Creates a label.
+        /// </summary>
+        /// <param name="x"></param>
+        void Label(int x)
+        {
+            // Start Label
+            Output.Add(0x0);
+            Output.Add(0xb);
+
+            // Add the label variable address
+            foreach (byte add in BitConverter.GetBytes(x))
+                Output.Add(add);
+
+            // End Label
+            Output.Add(0xff);
+        }
+
+        void Goto(int x, int y)
+        {
+            // Start Goto
+            Output.Add(0x0);
+            Output.Add(0xc);
+
+            // Add the label variable address
+            foreach (byte add in BitConverter.GetBytes(x))
+                Output.Add(add);
+
+            // Add the check variable address
+            Output.Add(0xfe);
+
+            foreach (byte add in BitConverter.GetBytes(y))
+                Output.Add(add);
+
             Output.Add(0xff);
         }
 
@@ -609,6 +651,54 @@ namespace Strobe
                             // Thow an exception
                             throw new Exception("Invalid arguments in `proc_Add`.");
                         break;
+                    case "label":
+                        if (i.Func.Arguments.Arguments.Count == 1 && !i.Func.Arguments.Arguments[0].isConst)
+                        {
+                            int var = AddVariable(BitConverter.GetBytes(++LabelID));
+                            Label(var);
+                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
+                                // Directly move
+                                Move(int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x')), var);
+                            else
+                            {
+                                // Define if not already defined
+                                if (!Vars.ContainsKey(func.Name + i.Func.Arguments.Arguments[0].Name))
+                                {
+                                    Vars.Add(func.Name + i.Func.Arguments.Arguments[0].Name, var);
+                                }
+                                else
+                                {
+                                    // Change if already defined
+                                    Vars[func.Name + i.Func.Arguments.Arguments[0].Name] = var;
+                                }
+                            }
+                        }
+                        else throw new Exception("Invalid arguments in `label`.");
+                        break;
+                    case "goto":
+                        if (i.Func.Arguments.Arguments.Count == 2 && !i.Func.Arguments.Arguments[0].isConst && !i.Func.Arguments.Arguments[1].isConst)
+                        {
+                            int var0;
+                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
+                                //Set the var to a parsed integer of the var name without "x"
+                                var0 = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
+                            else
+                                // Set the var to the pre-defined value of the var name.
+                                var0 = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
+
+                            int var1;
+                            if (i.Func.Arguments.Arguments[1].Name.ToLower().StartsWith("x"))
+                                //Set the var to a parsed integer of the var name without "x"
+                                var1 = int.Parse(i.Func.Arguments.Arguments[1].Name.ToLower().TrimStart('x'));
+                            else
+                                // Set the var to the pre-defined value of the var name.
+                                var1 = Vars[func.Name + i.Func.Arguments.Arguments[1].Name];
+
+
+                            Goto(var0,var1);
+                        }
+                        else throw new Exception("Invalid arguments in `goto`.");
+                        break;
                     /*
                      * Clear Value
                      */
@@ -887,7 +977,7 @@ namespace Strobe
 		/// <summary>
 		/// Get the result.
 		/// </summary>
-		public CodeGeneratorResult get()
+		public CodeGeneratorResult get(bool debug)
 		{
 			return new CodeGeneratorResult
 			{

@@ -431,8 +431,9 @@ namespace Strobe
 		/// <summary>
 		/// Get the results.
 		/// </summary>
-		public ParserResult get()
+		public ParserResult get(bool debug)
 		{
+            if (debug)
 			foreach (Namespace x in Tree.Namespaces) {
 				System.Console.WriteLine ("Namespace: {0}",x.Name);
 				foreach (Function y in x.Functions)

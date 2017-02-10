@@ -161,8 +161,9 @@ namespace Strobe
 		/// <summary>
 		/// Get the result.
 		/// </summary>
-		public SimplifierResult get()
+		public SimplifierResult get(bool debug)
 		{
+            if (debug)
 			foreach (SToken s in STokens) {
 				System.Console.WriteLine ("[{0}:{1}]{2}",s.Location,s.Type,s.Value);
 				if (s.Instruction?.Count > 0) {

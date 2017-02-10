@@ -218,8 +218,25 @@ namespace Strobe
 						nam += Now;
 						Now = Input[++Current];
 					}
-					// Add the tokens and move on
-					Tokens.Add(new Token { Value = nam, Type = TokenType.Identifier, Location = Current });
+                    // Check for keywords, like true, false, etc..
+                    switch(nam)
+                    {
+                        case "null":
+                            Tokens.Add(new Token { Value = "", Type = TokenType.String, Location = Current });
+                            break;
+                        // True = 1
+                        case "true":
+                            Tokens.Add(new Token { Value = "1", Type = TokenType.Number, Location = Current });
+                            break;
+                        // False = 0
+                        case "false":
+                            Tokens.Add(new Token { Value = "0", Type = TokenType.Number, Location = Current });
+                            break;
+                        default:
+                            // Add the tokens and move on
+                            Tokens.Add(new Token { Value = nam, Type = TokenType.Identifier, Location = Current });
+                            break;
+                    }
 					continue;
 				}
 				// The operators (if it is not a valid operator, i don't care the parser will take care of it)
@@ -342,12 +359,13 @@ namespace Strobe
 		/// <summary>
 		/// Get the result.
 		/// </summary>
-		public LexerResult get()
+		public LexerResult get(bool debug)
 		{
-			//foreach (Token t in Tokens)
-			//{
-			//	System.Console.WriteLine("[{0}]:{1}",t.Type,t.Value);
-			//}
+            if(debug)
+			foreach (Token t in Tokens)
+			{
+				System.Console.WriteLine("[{0}]:{1}",t.Type,t.Value);
+			}
 			return new LexerResult
 			{
 				Tokens = Tokens,
