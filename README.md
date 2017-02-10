@@ -27,8 +27,8 @@ The syntax is influenced by the following programming languages:
 Read the wiki, starting with [this page](//github.com/mihail-mojsoski/Strobe/wiki/Learn-Strobe).
 
 ### Currently Working On:
-#### Functions and Loops
-#### Math Operations
+#### Loops and Comparations
+#### Extended Math Operations
 #### C++ Runtime
 
 ###Do you want to support us?
