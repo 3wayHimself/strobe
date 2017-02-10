@@ -129,10 +129,10 @@ namespace StrobeVM.Firmware
 		/// <param name="now">Instruction.</param>
 		void Execute(Instruction now)
 		{
-			switch (now.Op)
+            int[] args = proc.TwoArgs(now.Param);
+            switch (now.Op)
 			{
 				case Instruction.OpType.Assign:
-					int[] d = proc.TwoArgs(now.Param);
 					var by = new List<byte>();
 					bool use = false;
 					foreach (byte z in now.Param)
@@ -143,33 +143,29 @@ namespace StrobeVM.Firmware
 						}
 						use |= z == 254;
 					}
-					AMem(d[0], by.ToArray());
+					AMem(args[0], by.ToArray());
 					break;
 				case Instruction.OpType.Addr:
-					int[] ab = proc.TwoArgs(now.Param);
-					AMem(ab[0], ab[1]);
+					AMem(args[0], args[1]);
 					break;
 				case Instruction.OpType.Move:
-					int[] a = proc.TwoArgs(now.Param);
-					AMem(a[0], AMem(a[1]));
+					AMem(args[0], AMem(args[1]));
 					break;
 				case Instruction.OpType.Allocate:
-					int[] p = proc.TwoArgs(now.Param);
-					AMem(p[0], FreeAddr, p[1]);
+					AMem(args[0], FreeAddr, args[1]);
 					break;
 				case Instruction.OpType.Label:
-					int[] h = proc.TwoArgs(now.Param);
-					Labels.Add(BitConverter.ToInt32(AMem(h[0]),0),loc[currentprocess - 1]);
+					Labels.Add(BitConverter.ToInt32(AMem(args[0]),0),loc[currentprocess - 1]);
 					break;
 				case Instruction.OpType.Goto:
-					int[] c = proc.TwoArgs(now.Param);
-					if (Labels.ContainsKey(BitConverter.ToInt32(AMem(c[0]),0)))
-					if (AMem(c[1])[0] == 0x0)
-						loc[currentprocess - 1] = Labels[c[0]];
-					break;
+					if (Labels.ContainsKey(BitConverter.ToInt32(AMem(args[0]),0)))
+                    {
+                        if (AMem(args[1])[0] == 0x1)
+                            loc[currentprocess - 1] = Labels[BitConverter.ToInt32(AMem(args[0]), 0)];
+                    }
+                    break;
 				case Instruction.OpType.Clear:
-					int[] zvzx = proc.TwoArgs(now.Param);
-					AMemClear(zvzx[0]);
+					AMemClear(args[0]);
 					break;
 				default:
 					AMem(0, proc.Execute(now));

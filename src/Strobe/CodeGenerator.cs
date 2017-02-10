@@ -335,7 +335,7 @@ namespace Strobe
         {
             // Start Label
             Output.Add(0x0);
-            Output.Add(0xb);
+            Output.Add(0xa);
 
             // Add the label variable address
             foreach (byte add in BitConverter.GetBytes(x))
@@ -349,7 +349,7 @@ namespace Strobe
         {
             // Start Goto
             Output.Add(0x0);
-            Output.Add(0xc);
+            Output.Add(0xb);
 
             // Add the label variable address
             foreach (byte add in BitConverter.GetBytes(x))
