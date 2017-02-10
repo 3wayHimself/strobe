@@ -6,13 +6,19 @@ namespace Name
     {
 		$test = new(true);
 		label($hello);
-		{
-			Math.Write($test);
-			System.Write("\n");
-			Math.Write($hello);
-			System.Write("\n");
 
-		}
+		proc_Add($x10,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+		proc_Add($x0,$hello);
+
+		Math.Write($x0);
+
 		goto($hello,$test);
     	System.Exit(0);
     }
