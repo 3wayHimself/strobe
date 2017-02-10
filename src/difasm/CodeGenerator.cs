@@ -36,7 +36,12 @@ namespace difasm
         private void Allocate(byte[] param)
         {
             int[] i = TwoArgs(param);
+            if()
             // TODO: Continue from here.
+            asm.Variables.Add(new Variable
+            {
+                
+            });
         }
 
         public int[] TwoArgs(byte[] ar)
