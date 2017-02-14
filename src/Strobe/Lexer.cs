@@ -187,18 +187,21 @@ namespace Strobe
 				// Check if it is a variable
 				if (isVariable(Now))
 				{
-					TokenType type;
+                    // Put the variable name into vnam
+                    string vnam = "";
+
+                    TokenType type;
 					if (Now == '$')
 					{
 						type = TokenType.Variable;
 					}
 					else {
-						type = TokenType.Register;
-					}
-					// Put the variable name into vnam
-					string vnam = "";
-					// Cut the $ at the beginning
-					Now = Input[++Current];
+                        // Address
+                        type = TokenType.Variable;
+                        vnam = "x";
+                    }
+                    // Cut the $ at the beginning
+                    Now = Input[++Current];
 					// For better expirience
 					while (isIdentifier(Now) || char.IsNumber(Now) || Now == '.')
 					{
@@ -274,9 +277,7 @@ namespace Strobe
 		/// <param name="Char">Character.</param>
 		bool isNumOp(char Char)
 		{
-			return Char == '.' || Char == 'x' || Char == '+'
-				|| Char == '-' || Char == '*' || Char == '/'
-				|| Char == '%';
+			return Char == '.' || Char == 'x';
 		}
 
 		/// <summary>
@@ -287,10 +288,9 @@ namespace Strobe
 		bool isOperator(char Char)
 		{
 			return Char == '=' || Char == '!' || Char == '<' 
-				|| Char == '>' || Char == '*' || Char == '/'
-				|| Char == '+' || Char == '-' || Char == '%'
-				|| Char == '|' || Char == '&' || Char == '~'
-				|| Char == ',' || Char == ':' || Char == '.';
+				|| Char == '>' || Char == '|' || Char == '&'
+                || Char == '~' || Char == ',' || Char == ':'
+                || Char == '.';
 		}
 
 		/// <summary>
@@ -343,7 +343,7 @@ namespace Strobe
 		/// <param name="Char">Character.</param>
 		bool isVariable(char Char)
 		{
-			return Char == '$' || Char == '@';
+			return Char == '$' || Char == '*';
 		}
 
 		/// <summary>
