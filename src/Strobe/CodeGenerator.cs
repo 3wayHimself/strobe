@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Diagnostics;
 
 /*
   
@@ -91,13 +92,26 @@ namespace Strobe
 			Generate();
 		}
 
-		/// <summary>
-		/// Generate the code.
-		/// </summary>
-		void Generate()
+        /// <summary>
+        /// Add the DIF Header to the file
+        /// </summary>
+        void Header()
+        {
+            // Not actually needed, but recommended
+            foreach (byte add in "DIF" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion)
+                Output.Add(add);
+        }
+
+        /// <summary>
+        /// Generate the code.
+        /// </summary>
+        void Generate()
 		{
-			// For include
-			foreach (string s in Input.Preprocessor)
+            // Header
+            Header();
+
+            // For include
+            foreach (string s in Input.Preprocessor)
 				Preprocess (s);
 
 			// Actually import the namespaces & classes

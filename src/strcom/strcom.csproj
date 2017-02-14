@@ -50,6 +50,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\difread\difread.csproj">
+      <Project>{5de416da-80f2-41da-b474-3bc3aabb3886}</Project>
+      <Name>difread</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Strobe\strobe.csproj">
       <Project>{E3DDF33B-DF11-4DD6-B11F-E920E5841B23}</Project>
       <Name>strobe</Name>

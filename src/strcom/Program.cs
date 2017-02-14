@@ -11,6 +11,7 @@ namespace StrobeC
 		{
             bool pauseEnd = false;
             bool debug = false;
+            bool run = false;
 			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.WriteLine("Compiling...");
 			Console.ResetColor();
@@ -24,7 +25,8 @@ namespace StrobeC
                         debug = true;
                     if (args[i] == "--pause")
                         pauseEnd = true;
-                    
+                    if (args[i] == "--run")
+                        run = true;
                     if (args[i].StartsWith("--out:"))
 					{
 						save = args[i].TrimStart("--out:".ToCharArray());
@@ -63,13 +65,17 @@ namespace StrobeC
 							File.WriteAllBytes(save, result.Bytes);
 							Console.ForegroundColor = ConsoleColor.Green;
 							Console.WriteLine("Compile successfully completed!");
-							Console.ForegroundColor = ConsoleColor.DarkGray;
-							Console.WriteLine("VM Runtime [1M]:\n");
-							Console.ResetColor();
-							StrobeVMC.Main(new string[]{"--1m",save,sdebug});
+                            if (run)
+                            {
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.WriteLine("VM Runtime [1M]:\n");
+                                Console.ResetColor();
+                                StrobeVMC.Main(new string[] { "--1m", save, sdebug });
+                            }
+                            Console.ResetColor();
 
-						}
-						catch (Exception e)
+                        }
+                        catch (Exception e)
 						{
 							Console.WriteLine("Error 0: \""+e.Message+"\" at 0");
 						}
