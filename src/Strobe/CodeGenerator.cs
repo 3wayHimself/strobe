@@ -5,32 +5,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
 
-/*
-  
- 	Found this creature on Quora,
-	and it's called safety pig.
-
-	It helps you with this terrible code.
-	                         _
-	 _._ _..._ .-',     _.._(`))
-	'-. `     '  /-._.-'    ',/
-	   )         \            '.
-	  / _    _    |             \
-	 |  a    a    /              |
-	 \   .-.                     ;
-	  '-('' ).-'       ,'       ;
-	     '-;           |      .'
-	        \           \    /
-	        | 7  .__  _.-\   \
-	        | |  |  ``/  /`  /
-	       /,_|  |   /,_/   /
-	          /,_/      '`-'
-
-  I hope it works, because this code is messy.
-  Edit: It worked, found the bug and fixed it!
-
- */
-
 namespace Strobe
 {
 	/// <summary>
