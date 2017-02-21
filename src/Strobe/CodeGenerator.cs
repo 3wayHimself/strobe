@@ -10,7 +10,7 @@ namespace Strobe
 	/// <summary>
 	/// Code generator.
 	/// </summary>
-	public class CodeGenerator
+	public partial class CodeGenerator
 	{
         /// <summary>
         /// The label id
@@ -53,14 +53,14 @@ namespace Strobe
 		/// </summary>
 		List<byte> Output = new List<byte>();
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Strobe.CodeGenerator"/> class.
-		/// </summary>
-		/// <param name="Input">Input.</param>
-		public CodeGenerator (ParseTree Input)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CodeGenerator"/> class.
+        /// </summary>
+        /// <param name="Input">Input.</param>
+        public CodeGenerator (ParseTree Input)
 		{
-			// We use 0x2c because of safety.
-			CurrentVar = 0x2c;
+			// Changed to 16 because we seperated the memory of the processes
+			CurrentVar = 16;
 			this.Input = Input;
 			// Generate the code.
 			Generate();
@@ -98,13 +98,31 @@ namespace Strobe
 			Generate (findMain(),null,null);
 		}
 
-		/// <summary>
-		/// Preprocess the specified string.
-		/// </summary>
-		/// <param name="s">String.</param>
-		void Preprocess(string s)
+        /// <summary>
+        /// Get a passed argument from 
+        /// </summary>
+        /// <param name="i">Current Instruction</param>
+        /// <param name="func">Current Function</param>
+        /// <param name="num"></param>
+        /// <returns>The </returns>
+        int GetArgument(Instruction i,Function func, int num)
+        {
+            int ret;
+            if (i.Func.Arguments.Arguments[num].Name.ToLower().StartsWith("x"))
+                ret = int.Parse(i.Func.Arguments.Arguments[num].Name.ToLower().TrimStart('x'));
+            else
+                ret = Vars[func.Name + i.Func.Arguments.Arguments[num].Name];
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Preprocess the specified string.
+        /// </summary>
+        /// <param name="s">String.</param>
+        void Preprocess(string s)
 		{
-			// Hell..
+			// Hell.. (NO LONGER HELL)
 
 			// Include
 			if (s.StartsWith("include")) {
@@ -473,416 +491,11 @@ namespace Strobe
 					}
 				}
 			}
-
-			// Parse the instructions
-			foreach (Instruction i in func.Instructions) {
-				switch (i.Func.Function) {
-                    /*
-                     * Handle Blocks
-                     */
-                    case "_ !block":
-                        // Handle the block
-                        Generate(new Function
-                        {
-                            // Keep the name (because of variables).
-                            Name = func.Name,
-                            // Copy the instructions
-                            Instructions = ((IBlock)i).List,
-                            // Return nothing
-                            Ret = new Return(),
-                            // Take no arguments
-                            Arguments = new Args
-                            {
-                                // Because
-                                Arguments = new List<Variable>()
-                            }
-                        },null,func);
-                        break;
-					/*
-					 * Define new variable from constant
-					 */
-				case "new":
-						// Check if it has valid arguments
-						if (i.Func.Arguments.Arguments.Count == 1 && i.Func.Arguments.Arguments [0].isConst) {
-							byte[] x;
-							// Check if it's a number or string
-							if (i.Func.Arguments.Arguments [0].isNum) {
-								// Number
-								x = BitConverter.GetBytes(int.Parse (i.Func.Arguments.Arguments [0].Name));
-							} else {
-								// String
-								x  = Encoding.ASCII.GetBytes(i.Func.Arguments.Arguments [0].Name);
-							}
-							// Define the variable
-							int var = AddVariable(x);
-
-							// Assign the value to the variable
-							if (i.Op?.Type == "=") {
-								// Check if it's valid
-								if (i.Var?.isConst == false) {
-									// Is it direct? (starts with x)
-									if (i.Var.Name.ToLower ().StartsWith ("x"))
-										// Directly move
-										Move (int.Parse (i.Var.Name.ToLower ().TrimStart ('x')), var);
-									else {
-										// Define if not already defined
-										if (!Vars.ContainsKey (func.Name + i.Var.Name)) {
-											Vars.Add (func.Name + i.Var.Name, var);
-										} else {
-											// Change if already defined
-											Vars [func.Name + i.Var.Name] = var;
-										}
-									}
-								}
-							}
-							// Throw an exception
-						} else throw new Exception ("Invalid arguments in `new`.");
-					break;
-                    /*
-                     * Multiply two numbers
-                     */
-                    case "proc_Mul":
-                        // Check for valid size of arguments.
-                        if (i.Func.Arguments.Arguments.Count == 2)
-                        {
-                            int var1, var2;
-                            // Check for the arguments var1
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                var1 = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                            else
-                                var1 = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-
-                            // Check for the arguments var2
-                            if (i.Func.Arguments.Arguments[1].Name.ToLower().StartsWith("x"))
-                                var2 = int.Parse(i.Func.Arguments.Arguments[1].Name.ToLower().TrimStart('x'));
-                            else
-                                var2 = Vars[func.Name + i.Func.Arguments.Arguments[1].Name];
-
-                            // Use the add function.
-                            Mul(var1, var2);
-                        }
-                        else throw new Exception("Invalid arguments in `proc_Mul`.");
-                        break;
-                    /*
-                     * Divide two numbers
-                     */
-                    case "proc_Div":
-                        // Check for valid size of arguments.
-                        if (i.Func.Arguments.Arguments.Count == 2)
-                        {
-                            int var1, var2;
-                            // Check for the arguments var1
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                var1 = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                            else
-                                var1 = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-
-                            // Check for the arguments var2
-                            if (i.Func.Arguments.Arguments[1].Name.ToLower().StartsWith("x"))
-                                var2 = int.Parse(i.Func.Arguments.Arguments[1].Name.ToLower().TrimStart('x'));
-                            else
-                                var2 = Vars[func.Name + i.Func.Arguments.Arguments[1].Name];
-
-                            // Use the add function.
-                            Div(var1, var2);
-                        }
-                        else throw new Exception("Invalid arguments in `proc_Div`.");
-                        break;
-                    /*
-                     * Subtract two numbers
-                     */
-                    case "proc_Sub":
-                        // Check for valid size of arguments.
-                        if (i.Func.Arguments.Arguments.Count == 2)
-                        {
-                            int var1, var2;
-                            // Check for the arguments var1
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                var1 = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                            else
-                                var1 = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-
-                            // Check for the arguments var2
-                            if (i.Func.Arguments.Arguments[1].Name.ToLower().StartsWith("x"))
-                                var2 = int.Parse(i.Func.Arguments.Arguments[1].Name.ToLower().TrimStart('x'));
-                            else
-                                var2 = Vars[func.Name + i.Func.Arguments.Arguments[1].Name];
-
-                            // Use the add function.
-                            Sub(var1, var2);
-                        }
-                        else throw new Exception("Invalid arguments in `proc_Sub`.");
-                        break;
-                        /*
-                         * Add two numbers
-                         */
-                    case "proc_Add":
-                        // Check for valid size of arguments.
-                        if (i.Func.Arguments.Arguments.Count == 2)
-                        {
-                            int var1, var2;
-                            // Check for the arguments var1
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                var1 = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                            else
-                                var1 = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-
-                            // Check for the arguments var2
-                            if (i.Func.Arguments.Arguments[1].Name.ToLower().StartsWith("x"))
-                                var2 = int.Parse(i.Func.Arguments.Arguments[1].Name.ToLower().TrimStart('x'));
-                            else
-                                var2 = Vars[func.Name + i.Func.Arguments.Arguments[1].Name];
-
-                            // Use the add function.
-                            Add(var1,var2);
-                        } else
-                            // Thow an exception
-                            throw new Exception("Invalid arguments in `proc_Add`.");
-                        break;
-                    case "label":
-                        if (i.Func.Arguments.Arguments.Count == 1 && !i.Func.Arguments.Arguments[0].isConst)
-                        {
-                            int var = AddVariable(BitConverter.GetBytes(++LabelID));
-                            Label(var);
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                // Directly move
-                                Move(int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x')), var);
-                            else
-                            {
-                                // Define if not already defined
-                                if (!Vars.ContainsKey(func.Name + i.Func.Arguments.Arguments[0].Name))
-                                {
-                                    Vars.Add(func.Name + i.Func.Arguments.Arguments[0].Name, var);
-                                }
-                                else
-                                {
-                                    // Change if already defined
-                                    Vars[func.Name + i.Func.Arguments.Arguments[0].Name] = var;
-                                }
-                            }
-                        }
-                        else throw new Exception("Invalid arguments in `label`.");
-                        break;
-                    case "goto":
-                        if (i.Func.Arguments.Arguments.Count == 2 && !i.Func.Arguments.Arguments[0].isConst && !i.Func.Arguments.Arguments[1].isConst)
-                        {
-                            int var0;
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                //Set the var to a parsed integer of the var name without "x"
-                                var0 = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                            else
-                                // Set the var to the pre-defined value of the var name.
-                                var0 = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-
-                            int var1;
-                            if (i.Func.Arguments.Arguments[1].Name.ToLower().StartsWith("x"))
-                                //Set the var to a parsed integer of the var name without "x"
-                                var1 = int.Parse(i.Func.Arguments.Arguments[1].Name.ToLower().TrimStart('x'));
-                            else
-                                // Set the var to the pre-defined value of the var name.
-                                var1 = Vars[func.Name + i.Func.Arguments.Arguments[1].Name];
-
-
-                            Goto(var0,var1);
-                        }
-                        else throw new Exception("Invalid arguments in `goto`.");
-                        break;
-                    /*
-                     * Clear Value
-                     */
-                    case "clear":
-                        // Check for the arguments count.
-                        if (i.Func.Arguments.Arguments.Count == 1)
-                        {
-                            int var;
-                            // If it starts with "x", directly load the value
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                //Set the var to a parsed integer of the var name without "x"
-                                var = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                            else
-                                // Set the var to the pre-defined value of the var name.
-                                var = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-
-                            // Clear the variable.
-                            ClearVar(var);
-                        }
-                        else throw new Exception("Invalid arguments in `clear`.");
-                        break;
-                        /*
-                         * Get value
-                         */ 
-				case "get":
-						// Check for the arguments count
-						if (i.Func.Arguments.Arguments.Count == 1) {
-							int var;
-
-							// If it starts with "x", directly load the value
-							if (i.Func.Arguments.Arguments [0].Name.ToLower ().StartsWith ("x"))
-
-								//Set the var to a parsed integer of the var name without "x"
-								var = int.Parse (i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart ('x')); 
-							else
-								// Set the var to the pre-defined value of the var name.
-								var = Vars[func.Name + i.Func.Arguments.Arguments [0].Name];
-
-							// Check if sould assign
-							if (i.Op?.Type == "=") {
-								// Check if the variable is valid
-								if (i.Var?.isConst == false) {
-
-									// If it starts with "x", directly put into the variable
-									if (i.Var.Name.ToLower ().StartsWith ("x"))
-										// Move.
-										Move (int.Parse (i.Var.Name.ToLower ().TrimStart ('x')), var);
-									else {
-										// If the variable isn't defined, define it.
-										if (!Vars.ContainsKey (func.Name + i.Var.Name)) {
-											Vars.Add (func.Name + i.Var.Name, var);
-										} else {
-											// Change the variable
-											Vars [func.Name + i.Var.Name] = var;
-										}
-									}
-								}
-							}
-						} else
-							// Throw the exception
-							throw new Exception ("Incorrect amount of arguments in `get`.");
-					break;
-                        /*
-                         * The Is function.
-                         */
-                case "is":
-                        // Default size is 4
-                        int mSize = 4;
-                        // If there is a second argument
-                        if (i.Func.Arguments.Arguments.Count == 2)
-                        {
-                            // And it's a number
-                            if (i.Func.Arguments.Arguments[1].isNum)
-                                // Set the size to that number
-                                mSize = int.Parse(i.Func.Arguments.Arguments[1].Name);
-                            else
-                                // If not, thow an exception
-                                throw new Exception("Invalid argument in `is`.");
-                        }
-                        // Select the old variable
-                        int oldVar = 0;
-                        // Create the new variable
-                        int newVar = AddVariable(new byte[mSize]);
-                        // Get your sources
-                        if (i.Func.Arguments.Arguments[0].isConst == false)
-                        {
-                            // Check if it is an address
-                            if (i.Func.Arguments.Arguments[0].Name.ToLower().StartsWith("x"))
-                                // Set the oldVar address to that address.
-                                oldVar = int.Parse(i.Func.Arguments.Arguments[0].Name.ToLower().TrimStart('x'));
-                             else
-                                // Find a predefined variable.
-                                oldVar = Vars[func.Name + i.Func.Arguments.Arguments[0].Name];
-                        }
-                        else
-                            throw new Exception("Invalid argument in `is`.");
-                        // Where to assign
-                        if (i.Op?.Type == "=")
-                        {
-                            // Check if the variable is valid
-                            if (i.Var?.isConst == false)
-                            {
-
-                                // If it starts with "x", directly put into the variable
-                                if (i.Var.Name.ToLower().StartsWith("x"))
-                                    // Move.
-                                    newVar = int.Parse(i.Var.Name.ToLower().TrimStart('x'));
-                                else
-                                {
-                                    // If the variable isn't defined, define it.
-                                    if (!Vars.ContainsKey(func.Name + i.Var.Name))
-                                    {
-                                        Vars.Add(func.Name + i.Var.Name, newVar);
-                                    }
-                                    else
-                                    {
-                                        // Change the variable
-                                        Vars[func.Name + i.Var.Name] = newVar;
-                                    }
-                                }
-                            }
-                        }
-                        MoveC(newVar, oldVar);
-                        break;
-						/*
-						 * Interrupt
-						 */
-				case "int":
-						// Check if the arguments are correct & interrupt
-						if (i.Func.Arguments.Arguments.Count == 1 && i.Func.Arguments.Arguments[0].isNum)
-						{
-							int x = int.Parse(i.Func.Arguments.Arguments[0].Name);
-							// Interrupt
-							Interrupt((byte)x);
-						} else
-							// Thow the exception
-							throw new Exception("Interrupt can only accept bytes as arguments.");
-					break;
-					/*
-					 * Execute Function
-					 */
-					default:
-						// Find the function
-						Function f = find (i.Func.Namespace, i.Func.Function);
-						// Set the function name to something unique to the namespace
-						f.Name = i.Func.Namespace + " " + i.Func.Function + " ";
-						// Generate the function, and return.
-						Generate (f,i.Func.Arguments,func);
-						// Return if it's a variable
-						if (f.Ret?.Type == TokenType.Variable)
-						{
-							int var;
-							// Check if should return address.
-							if (f.Ret.Value.ToLower().StartsWith("x"))
-								// Get direct address.
-								var = int.Parse(f.Ret.Value.ToLower().TrimStart('x'));
-							else
-								// Get variable.
-								var = Vars[f.Name + f.Ret.Value];
-							// Check if should assign
-							if (i.Op?.Type == "=")
-							{
-								if (i.Var?.isConst == false)
-								{
-									// Check if it's a direct address
-									if (i.Var.Name.ToLower().StartsWith("x"))
-										// Move the data**
-										MoveC(int.Parse(i.Var.Name.ToLower().TrimStart('x')), var);
-									else {
-										// Define the variable if it's not already defined
-										if (!Vars.ContainsKey(func.Name + i.Var.Name))
-										{
-                                            // Define Variable
-                                            Vars.Add(func.Name + i.Var.Name, var);
-                                        }
-                                        else {
-                                            // Change Variable
-                                            Vars[func.Name + i.Var.Name] = var;
-                                        }
-                                    }
-								}
-							}
-						}
-						else {
-							// Make sure that it's an invalid return and not a void
-							if (f.Ret?.Type == TokenType.Number
-								|| f.Ret?.Type == TokenType.Register
-								|| f.Ret.Type == TokenType.String)
-								throw new Exception("Functions can only return variables!");
-						}
-						// Collect the garbadge (if not in block)
-                        if ((old != null) && (old.Name == func.Name))
-                            CollectGarbadge(f.Name);
-                        break;
-				}
-			}
+            // Parse the instructions
+            foreach (Instruction i in func.Instructions)
+            {
+                GenerateInstruction(i,func,args,old);
+            }
 		}
 
 		/// <summary>

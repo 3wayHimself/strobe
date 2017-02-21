@@ -1,25 +1,23 @@
 ﻿#include <bioslib.str>
-#include <math.str>
+#include <memory.str>
 namespace Name
 {
     function Main()
     {
+		$one = new(696969);
 		$test = new(true);
 		label($hello);
-
-		proc_Add(*10,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-		proc_Add(*0,$hello);
-
-		Math.Write(*0);
-
+		proc_Add($one,$one);
+		Write($one);
+		Memory.Reset();
 		goto($hello,$test);
     	System.Exit(0);
     }
+	function Write(*0)
+	{
+		*2 = new(1);
+		int(1);
+		int(2);
+		clear(*2);
+	}
 }

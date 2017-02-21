@@ -39,11 +39,11 @@ namespace StrobeC
 				else {
 					CompilerResult result = new CompilerResult ();
 					string input = File.ReadAllText(name);
-					try {
+					//try {
 					result = new Compiler(input).compile(debug);
-					} catch(Exception e) {
-						Console.WriteLine ("Error n: {0}",e.Message);
-					}
+					//} catch(Exception e) {
+					//	Console.WriteLine ("Error n: {0}",e.Message);
+					//}
 					foreach (Error e in result.Errors)
 					{
 						Console.ForegroundColor = ConsoleColor.Red;
