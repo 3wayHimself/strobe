@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using StrobeVM;
-using StrobeVM.DIF;
+using strobe.runtime.DIF;
 
 namespace difread
 {

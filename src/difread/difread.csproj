@@ -52,10 +52,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\strvmr\strdif\strdif.csproj">
-      <Project>{80aa0bf3-db48-4596-899a-1fbf705004c7}</Project>
-      <Name>strdif</Name>
-    </ProjectReference>
     <ProjectReference Include="..\strvmr\strlib\strlib.csproj">
       <Project>{0265F221-395F-4B78-821C-26E20B7BD86E}</Project>
       <Name>strlib</Name>

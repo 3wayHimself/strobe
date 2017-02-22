@@ -30,16 +30,16 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationExit.cs" />
+    <Compile Include="DIF\DIFExecuteable.cs" />
+    <Compile Include="DIF\DIFFormat.cs" />
+    <Compile Include="DIF\DIFInstruction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Executeable.cs" />
-    <Compile Include="Format.cs" />
-    <Compile Include="Hardware\Memory.cs" />
-    <Compile Include="Hardware\Processor.cs" />
-    <Compile Include="Instruction.cs" />
-    <Compile Include="Hardware\Hardware.cs" />
-    <Compile Include="Firmware\BIOS.cs" />
-    <Compile Include="Firmware\Kernel.cs" />
-    <Compile Include="Firmware\Setup.cs" />
+    <Compile Include="Structure\API.cs" />
+    <Compile Include="Structure\Executable.cs" />
+    <Compile Include="Structure\Format.cs" />
+    <Compile Include="Structure\Framework.cs" />
+    <Compile Include="Structure\Instruction.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

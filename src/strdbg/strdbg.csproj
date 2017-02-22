@@ -66,10 +66,6 @@
       <Project>{2DA50113-1398-4C64-9227-CF89B3E7ECB5}</Project>
       <Name>strcom</Name>
     </ProjectReference>
-    <ProjectReference Include="..\strvmr\strdif\strdif.csproj">
-      <Project>{80AA0BF3-DB48-4596-899A-1FBF705004C7}</Project>
-      <Name>strdif</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Strobe\strobe.csproj">
       <Project>{E3DDF33B-DF11-4DD6-B11F-E920E5841B23}</Project>
       <Name>strobe</Name>

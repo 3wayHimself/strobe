@@ -1,8 +1,9 @@
-﻿using StrobeVM.DIF;
-using StrobeVM;
-using StrobeVM.Firmware;
-using System.IO;
+﻿using System.IO;
 using System;
+using strobe.runtime.DIF;
+using System.Collections.Generic;
+using strobe.runtime;
+using strvmc.APIs;
 
 namespace strvmc
 {
@@ -17,10 +18,19 @@ namespace strvmc
 		/// <param name="param">The command-line arguments.</param>
 		public static void Main(string[] param)
 		{
+            // Will find a solution for this (to add them automaticaly).
+            API framework = new Framework(
+                new API[] {
+                    new StrobeAPI(),
+                    // If you make an API add it here!
+                }, "Internal APIs");
+
             bool debug = false;
-			// The kernel has 1MB memory, change this if you want to.
-			Kernel kernel = new Kernel(1024 * 1024);
-			int i = 0;
+            int memorysize = 2048;
+            int lastCode = 0;
+
+            // List of processes
+            List<Process> proc = new List<Process>();
 
 			// Check for the console input
 			foreach (string s in param)
@@ -28,85 +38,89 @@ namespace strvmc
 				// Switch the string
 				switch (s.ToLower())
 				{
-                    // Show out the parsed executable
-                    case "--debug":
-                        debug = true;
-                        break;
-					// Save the loaded bytes to a DIF file
-				case "--save":
-					Executeable[] Execs = kernel.Save ();
-					int n=0;
-					foreach (Executeable e in Execs) {
-						File.WriteAllBytes("bin" + n + ".dif",new DIFFormat().GetBytes(e));
-					}
-					break;
-					// Kernel 512MB memory
+                  // Show out the parsed executable
+                case "--debug":
+                    debug = true;
+                    break;
+					// 512MB memory
 				case "--512m":
-					kernel = new Kernel(1024 * 1024 * 512);
+                    memorysize = (1024 * 1024 * 512);
 					break;
-					// Kernel 32MB memory
+					// 32MB memory
 				case "--32m":
-					kernel = new Kernel(1024 * 1024 * 32);
+                    memorysize = (1024 * 1024 * 32);
 					break;
-					// Kernel 1MB memory
+					// 1MB memory
 				case "--1m":
-					kernel = new Kernel(1024 * 1024);
+                    memorysize = (1024 * 1024);
 					break;
-					// Kernel 1GB memory
+					// 1GB memory
 				case "--1g":
-					kernel = new Kernel(1024 * 1024 * 1024);
-					break;
-					// Bios setup
-				case "--bios":
-					kernel.Start(new DIFFormat().Load(BIOS.Setup()));
+                    memorysize = (1024 * 1024 * 1024);
 					break;
 					// Load File
 					default:
 						try
 						{
-							// Load the executeable using the DIF Format
-							Executeable x = new DIFFormat().Load(File.ReadAllBytes(s));
-							// Start the application in the kernel
-							kernel.Start(x);
+                            var x = new DIFFormat().Load(File.ReadAllBytes(s));
+                            if (debug)
+                            {
+                                    foreach (var y in x.CPU())
+                                    {
+                                        Console.WriteLine("{0}: {1}", y.Op, Convert.ToBase64String(y.Param));
+                                    }
+                            }
+                            // Start the application
+                            proc.Add(new Process(x,memorysize,framework));
 						}
 						catch(Exception e)
 						{
                             if (s.Length > 2)
                             // Show output
-                            System.Console.WriteLine("{1} @ {0}", s, e.Message);
+                            Console.WriteLine("{1} @ {0}", s, e.Message);
 							// Error while loading, increase the counter
-							i++;
 						}
 					break;
 				}
 			}
 
-            if (debug)
-            {
-                foreach (Executeable e in kernel.Save())
+			// Step while it has running processes...
+			while (proc.Count > 0)
+			{
+                for (int i = 0; i < proc.Count; i++)
                 {
-                    var x = e.CPU();
-
-                    foreach (var y in x)
+                    if (!proc[i].IsRunning())
                     {
-                        System.Console.WriteLine("{0}: {1}", y.Op, System.Convert.ToBase64String(y.Param));
+                        proc.RemoveAt(i);
+                        continue;
+                    }
+                    try
+                    {
+                        proc[i].Step();
+                    }
+                    catch (ApplicationNotRunning)
+                    {
+                        proc[i].Kill();
+                    }
+                    catch (ApplicationExit s)
+                    {
+                        lastCode = int.Parse(s.Message);
+                        proc[i].Kill();
+                    }
+                    catch (ApplicationError e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Application Error: {0}",e.Message);
+                        Console.ResetColor();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Unhandled Exception: {0}", e.Message);
+                        Console.ResetColor();
                     }
                 }
             }
-
-			// Step the kernel while it has running processes...
-			while (kernel.running.Count > 0)
-			{
-				try
-				{
-					kernel.Step();
-				}
-				catch (System.Exception e)
-				{
-					System.Console.WriteLine("VM ERROR: {0}",e.Message);
-					System.Environment.Exit(1);
-				}
-			}
 		}
 	}
 }
