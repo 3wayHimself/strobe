@@ -7,8 +7,6 @@ void main(void)
 {
 	Runtime x = Runtime();
 	Executable e;
-	e.add(Instruction(Op_Allocate, { 0x1,0x0,0x0,0x0,0xfe,0x1,0x0,0x0,0x0 }));
-	e.add(Instruction(Op_Assign, { 0x1,0xfe,0x1,0x0,0x0,0x0 }));
-	e.add(Instruction(Op_Test, Empty));
+	// Actually implement this....
 	x.Run(e);
 }
