@@ -272,13 +272,6 @@ namespace Strobe
 							continue;
 						}
 					}
-					if (x.Type == TokenType.Register) {
-						if (!Lvar) {
-							Tvar = new Variable { Name = x.Value, isReg = true };
-							Lvar = true;
-							continue;
-						}
-					}
 					if (x.Type == TokenType.Number) {
 						if (!Lvar) {
 							Tvar = new Variable { Name = x.Value, isNum = true, isConst = true };
@@ -385,9 +378,6 @@ namespace Strobe
 					toAdd = false;
 					if (x.Type == TokenType.Variable) {
 						n.Arguments.Add (new Variable { Name = x.Value });
-					}
-					if (x.Type == TokenType.Register) {
-						n.Arguments.Add (new Variable { Name = x.Value, isReg = true });
 					}
 					if (x.Type == TokenType.Number) {
 						n.Arguments.Add (new Variable { Name = x.Value, isNum = true, isConst = true });

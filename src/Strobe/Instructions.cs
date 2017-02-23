@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Strobe
 {
@@ -201,14 +199,14 @@ namespace Strobe
                     {
                         CurrentVar = int.Parse(16 + i.Func.Arguments.Arguments[0].Name);
                     }
-                    else throw new Exception("Invalid arguments in set_label.");
+                    else throw new Exception("Invalid arguments in `set_label`.");
                     break;
                 case "set_variable":
                     if (i.Func.Arguments.Arguments.Count == 1 && i.Func.Arguments.Arguments[0].isNum)
                     {
                         LabelID = int.Parse(i.Func.Arguments.Arguments[0].Name);
                     }
-                    else throw new Exception("Invalid arguments in set_variable.");
+                    else throw new Exception("Invalid arguments `in set_variable`.");
                     break;
                 /*
                  * Get value
@@ -378,7 +376,6 @@ namespace Strobe
                     {
                         // Make sure that it's an invalid return and not a void
                         if (f.Ret?.Type == TokenType.Number
-                            || f.Ret?.Type == TokenType.Register
                             || f.Ret.Type == TokenType.String)
                             throw new Exception("Functions can only return variables!");
                     }

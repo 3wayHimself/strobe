@@ -24,7 +24,6 @@
 		Break = 4,
 		Variable = 5,
 		Operator = 6,
-		Register = 7,
 		PreProcessor = 8,
 	}
 
